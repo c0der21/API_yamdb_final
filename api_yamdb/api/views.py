@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from reviews.models import Category, Genre, Review, Title, User
 
 from .permissions import (ReadOnlyPermission, UserIsAuthor, AdminPermission, ModeratorPermission)
-
+from .serializers import (SignupSerializer, TokenSerializer)
 
 class Signup(APIView):
     def post(self, request):
