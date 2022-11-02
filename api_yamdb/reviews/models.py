@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import ValidationError
 
 USER = 'user'
 ADMIN = 'admin'
@@ -132,3 +133,56 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        'Title',
+        on_delete=models.CASCADE,
+        related_name='titles',
+        verbose_name='Название'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="author",
+        verbose_name="Автор отзыва",
+    )
+    text = models.TextField('Текст отзыва', max_length=2000)
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    grade = models.DecimalField('Рейтинг', max_digits=2, decimal_places=0)
+
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+
+    def clean(self):
+        if self.grade not in range(1,11):
+            raise ValidationError({'grade': 'Оценка может быть целым числом от 1 до 10'})
+
+    def __str__(self):
+        return self.text
+
+class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Комментарий к отзыву"
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="author",
+        verbose_name="Автор комментария"
+    )
+    text = models.TextField('Текст отзыва', max_length=1000)
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Комментарий к отзыву'
+        verbose_name_plural = 'Комментарии к отзыву'
+
+    def __str__(self):
+        return self.text
