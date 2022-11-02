@@ -31,3 +31,15 @@ class AdminPermission(BasePermission):
             or request.user.is_staff
             or request.user.is_superuser
         )
+
+class ModeratorPermission(BasePermission):
+    """Класс для разрешения доступа только модератору."""
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return request.user.role == UserRole.MODERATOR
+
+    def has_object_permission(self, request, view, obj):
+        return request.method in SAFE_METHODS or (
+            request.user.role == UserRole.MODERATOR
+        )
