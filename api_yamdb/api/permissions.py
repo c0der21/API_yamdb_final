@@ -1,20 +1,20 @@
-from rest_framework.permissions import permissions
+from rest_framework.permissions import *
 
 from reviews.models import User
 
-class ReadOnlyPermission(permissions.BasePermission):
+class ReadOnlyPermission(BasePermission):
     """Класс для разрешения доступа только для чтения."""
 
     def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+        return request.method in SAFE_METHODS
 
-class UserIsAuthor(permissions.BasePermission):
+class UserIsAuthor(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS
+        return (request.method in SAFE_METHODS
                 or obj.author == request.user)
 
-class AdminPermission(permissions.BasePermission):
+class AdminPermission(BasePermission):
     """Класс для разрешения доступа только администратору."""
 
     def has_permission(self, request, view):
@@ -26,13 +26,13 @@ class AdminPermission(permissions.BasePermission):
             )
 
     def has_object_permission(self, request, view, obj):
-        return request.method in permissions.SAFE_METHODS or (
+        return request.method in SAFE_METHODS or (
             request.user.role == User.ADMIN
             or request.user.is_staff
             or request.user.is_superuser
         )
 
-class ModeratorPermission(permissions.BasePermission):
+class ModeratorPermission(BasePermission):
     """Класс для разрешения доступа только модератору."""
 
     def has_permission(self, request, view):
@@ -40,6 +40,6 @@ class ModeratorPermission(permissions.BasePermission):
             return request.user.role == User.MODERATOR
 
     def has_object_permission(self, request, view, obj):
-        return request.method in permissions.SAFE_METHODS or (
+        return request.method in SAFE_METHODS or (
             request.user.role == User.MODERATOR
         )

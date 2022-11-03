@@ -20,6 +20,12 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
+    email = models.EmailField(
+        max_length=254,
+        unique=True,
+        blank=False,
+        null=False
+    )
     role = models.CharField(
         'роль',
         max_length=20,
