@@ -1,4 +1,4 @@
-from rest_framework.permissions import permissions
+from rest_framework.permissions import *
 
 from reviews.models import User
 
@@ -11,7 +11,7 @@ class ReadOnlyPermission(BasePermission):
 class UserIsAuthor(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS
+        return (request.method in SAFE_METHODS
                 or obj.author == request.user)
 
 class AdminPermission(BasePermission):
@@ -26,7 +26,7 @@ class AdminPermission(BasePermission):
             )
 
     def has_object_permission(self, request, view, obj):
-        return request.method in permissions.SAFE_METHODS or (
+        return request.method in SAFE_METHODS or (
             request.user.role == User.ADMIN
             or request.user.is_staff
             or request.user.is_superuser
@@ -37,9 +37,9 @@ class ModeratorPermission(BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_authenticated:
-            return request.user.role == UserRole.MODERATOR
+            return request.user.role == User.MODERATOR
 
     def has_object_permission(self, request, view, obj):
         return request.method in SAFE_METHODS or (
-            request.user.role == UserRole.MODERATOR
+            request.user.role == User.MODERATOR
         )
