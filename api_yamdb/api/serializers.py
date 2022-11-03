@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
-from reviews.models import
-
 
 class SignupSerializer(serializers.Serializer):
     """Класс для преобразования данных при получении кода подтверждения."""
