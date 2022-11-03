@@ -6,7 +6,7 @@ class ReadOnlyPermission(BasePermission):
     """Класс для разрешения доступа только для чтения."""
 
     def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS
+        return request.method in SAFE_METHODS
 
 class UserIsAuthor(BasePermission):
 
