@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from reviews.models import Category, Genre, Review, Title, User
 
 from .permissions import (AdminPermission, ModeratorPermission,
@@ -60,3 +62,27 @@ class Token(APIView):
         token_data = {'token': str(refresh.access_token)}
         return Response(token_data, status=status.HTTP_200_OK)
 
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated, AdminPermission,)
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
+    @action(
+        detail=False,
+        methods=['GET', 'PATCH'],
+        url_path='me',
+        permission_classes=(IsAuthenticated,),
+    )
+    def me(self, request):
+        if request.method != 'PATCH':
+            return Response(
+                UserSerializer(request.user).data, status=status.HTTP_200_OK
+            )
+        serializer = UserSerializer(
+            request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
