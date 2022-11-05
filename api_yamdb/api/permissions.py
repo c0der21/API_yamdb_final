@@ -2,21 +2,6 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from reviews.models import ADMIN, MODERATOR
 
-
-class ReadOnlyPermission(BasePermission):
-    """Класс для разрешения доступа только для чтения."""
-
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
-
-
-class ObjectAuthorPermission(BasePermission):
-    """Класс для разрешения доступа только для чтения или автору."""
-
-    def has_object_permission(self, request, view, obj):
-        return request.method in SAFE_METHODS or request.user == obj.author
-
-
 class AdminPermission(BasePermission):
     """Класс для разрешения доступа только администратору."""
 
