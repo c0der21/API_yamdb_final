@@ -3,7 +3,24 @@ from django.core.exceptions import ValidationError
 
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.validators import validate_username
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'role',
+            'email',
+            'first_name',
+            'last_name',
+            'bio'
+        ]
+
+    def validate_username(self, value):
+        return validate_username(value)
 
 
 class SignupSerializer(serializers.Serializer):
