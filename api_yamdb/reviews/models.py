@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.exceptions import ValidationError
 
+
+from .validators import validate_username, validate_year
+
 USER = 'user'
 ADMIN = 'admin'
 MODERATOR = 'moderator'
@@ -15,6 +18,7 @@ ROLE_CHOICES = [
 
 class User(AbstractUser):
     username = models.CharField(
+        validators=(validate_username,),
         max_length=150,
         unique=True,
         blank=False,
@@ -48,12 +52,15 @@ class User(AbstractUser):
         blank=True
     )
 
+    @property
     def is_user(self):
         return self.role == USER
 
+    @property
     def is_admin(self):
         return self.role == ADMIN
 
+    @property
     def is_moderator(self):
         return self.role == MODERATOR
 
@@ -112,6 +119,7 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         'год',
+        validators=(validate_year, )
     )
     category = models.ForeignKey(
         Category,
