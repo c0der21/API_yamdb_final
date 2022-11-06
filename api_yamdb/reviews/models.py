@@ -153,16 +153,16 @@ class Review(models.Model):
     title = models.ForeignKey(
         'Title',
         on_delete=models.CASCADE,
-        related_name='titles',
+        related_name='reviews',
         verbose_name='Название произведение'
     )
+    text = models.TextField('Текст отзыва', max_length=2000)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="reviews",
         verbose_name="Автор отзыва",
     )
-    text = models.TextField('Текст отзыва', max_length=2000)
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     grade = models.DecimalField('Рейтинг', max_digits=2, decimal_places=0)
 
