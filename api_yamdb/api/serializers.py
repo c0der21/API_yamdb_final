@@ -57,11 +57,20 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'year', 'category', 'description', 'genre', 'rating')
         model = Title
+
+
+    def get_rating(self, obj):
+        grades_of_reviews = Review.objects.filter(title=obj.title)
+        if grades_of_reviews == None:
+            return 'У этого произведения ещё нет оценок'
+        sum_rating = sum(grades_of_reviews)
+        avg_rating = sum_rating/len(sum_rating)
+        return avg_rating
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -89,8 +98,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True
     )
-
-    def validate_score(self, value):
+    def validate_grade(self, value):
         if 0 > value > 10:
             raise serializers.ValidationError('Оценка по 10-бальной шкале!')
         return value
