@@ -5,74 +5,51 @@ from django.core.exceptions import ValidationError
 
 from .validators import validate_username, validate_year
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
-
 
 class User(AbstractUser):
     username = models.CharField(
-        validators=(validate_username,),
+        verbose_name="Имя пользователя",
         max_length=150,
         unique=True,
-        blank=False,
-        null=False
     )
     email = models.EmailField(
-        max_length=254,
+        ("Электронная почта"),
         unique=True,
-        blank=False,
-        null=False
-    )
-    role = models.CharField(
-        'роль',
-        max_length=20,
-        choices=ROLE_CHOICES,
-        default=USER,
-        blank=True
-    )
-    bio = models.TextField(
-        'биография',
-        blank=True,
     )
     first_name = models.CharField(
-        'имя',
+        verbose_name="Имя",
         max_length=150,
-        blank=True
+        blank=True,
     )
     last_name = models.CharField(
-        'фамилия',
+        verbose_name="Фамилия",
         max_length=150,
-        blank=True
+        blank=True,
+    )
+    bio = models.TextField(
+        verbose_name="Биография",
+        blank=True,
     )
 
-    @property
-    def is_user(self):
-        return self.role == USER
+    ROLE_CHOICES = [
+        ("user", "user"),
+        ("moderator", "moderator"),
+        ("admin", "admin"),
+    ]
 
-    @property
-    def is_admin(self):
-        return self.role == ADMIN
-
-    @property
-    def is_moderator(self):
-        return self.role == MODERATOR
+    role = models.CharField(
+        verbose_name="Пользовательская роль",
+        max_length=9,
+        choices=ROLE_CHOICES,
+        default="user",
+    )
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.username
-
-
 class Category(models.Model):
     name = models.CharField(
         'имя категории',

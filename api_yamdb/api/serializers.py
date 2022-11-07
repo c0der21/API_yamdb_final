@@ -1,38 +1,38 @@
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
-
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from reviews.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'username',
-            'role',
-            'email',
-            'first_name',
-            'last_name',
-            'bio'
-        ]
-
-    def validate_username(self, value):
-        return validate_username(value)
+        fields = (
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role",
+        )
 
 
-class SignupSerializer(serializers.Serializer):
-    """Класс для преобразования данных при получении кода подтверждения."""
-    username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "email")
+
+    def validate_username(self, username):
+        if username.lower() == "me":
+            raise serializers.ValidationError(
+                'Использовать имя "me" запрещено!'
+            )
+        return username
 
 
-class TokenSerializer(serializers.Serializer):
-    """Класс для преобразования данных при получении токена."""
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
+class VerificationSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField(max_length=250)
 
 
 class CategorySerializer(serializers.ModelSerializer):

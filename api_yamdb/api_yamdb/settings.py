@@ -9,6 +9,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+AUTH_USER_MODEL = 'reviews.User'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -115,7 +117,4 @@ DEFAULT_FROM_EMAIL = 'test@yamdb.ru'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
-    'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-AUTH_USER_MODEL = 'reviews.User'
