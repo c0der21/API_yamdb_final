@@ -6,20 +6,23 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title, User
+from django.db.models import Avg
 
+from .filters import TitleFilter
 from api.permissions import (AdminModeratorAuthorPermission, AdminPermission,
                              IsAdminUserOrReadOnly)
 
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, RegistrationSerializer,
-                          ReviewSerializer, TitleReadSerializer,
-                          TitleWriteSerializer, UserSerializer,
+                          ReviewSerializer, TitleSerializer,
+                         UserSerializer,
                           VerificationSerializer)
 
 
@@ -35,18 +38,18 @@ class ModelMixinSet(CreateModelMixin, ListModelMixin,
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    lookup_field = "username"
+    lookup_field = 'username'
     permission_classes = [AdminPermission]
     filter_backends = [filters.SearchFilter]
-    search_fields = ["username"]
+    search_fields = ['username']
 
     @action(
         detail=False,
-        methods=["GET", "PATCH"],
+        methods=['GET', 'PATCH'],
         permission_classes=[permissions.IsAuthenticated],
     )
     def me(self, request):
-        if request.method == "PATCH":
+        if request.method == 'PATCH':
             serializer = self.get_serializer(
                 request.user, data=request.data, partial=True
             )
@@ -54,23 +57,23 @@ class UserViewSet(viewsets.ModelViewSet):
                 return Response(
                     serializer.errors, status=status.HTTP_400_BAD_REQUEST
                 )
-            if serializer.validated_data.get("role"):
-                if request.user.role != "admin" or not (
+            if serializer.validated_data.get('role'):
+                if request.user.role != 'admin' or not (
                     request.user.is_superuser
                 ):
-                    serializer.validated_data["role"] = request.user.role
+                    serializer.validated_data['role'] = request.user.role
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
+@api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def registration_view(request):
     serializer = RegistrationSerializer(data=request.data)
-    username = request.data.get("username")
-    email = request.data.get("email")
+    username = request.data.get('username')
+    email = request.data.get('email')
     if not (serializer.is_valid()):
         try:
             User.objects.get(username=username, email=email)
@@ -90,19 +93,19 @@ def registration_view(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
+@api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def verification_view(request):
     serializer = VerificationSerializer(data=request.data)
     if not (serializer.is_valid()):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    username = request.data.get("username")
-    confirmation_code = request.data.get("confirmation_code")
+    username = request.data.get('username')
+    confirmation_code = request.data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
     if not default_token_generator.check_token(user, confirmation_code):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     token = AccessToken.for_user(user)
-    return Response(data={"token": str(token)}, status=status.HTTP_200_OK)
+    return Response(data={'token': str(token)}, status=status.HTTP_200_OK)
 
 class CategoryViewSet(ModelMixinSet):
     queryset = Category.objects.all()
@@ -113,22 +116,21 @@ class CategoryViewSet(ModelMixinSet):
     lookup_field = 'slug'
 
 
-class TitleViewSet(ModelViewSet):
-    queryset = Title.objects.all()
-    permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (SearchFilter, )
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score')).order_by('id')
+    http_method_names = ['get', 'post', 'delete', 'patch']
+    permission_classes = [IsAdminUserOrReadOnly]
+    pagination_class = PageNumberPagination
+    serializer_class = TitleSerializer
+    filterset_class = TitleFilter
 
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleReadSerializer
-        return TitleWriteSerializer
 
 class GenreViewSet(ModelMixinSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (SearchFilter,)
-    search_fields = ('name', )
+    search_fields = ('name',)
     lookup_field = 'slug'
 
 

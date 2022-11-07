@@ -1,55 +1,53 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.exceptions import ValidationError
-
-
-from .validators import validate_username, validate_year
 
 
 class User(AbstractUser):
     username = models.CharField(
-        verbose_name="Имя пользователя",
+        verbose_name='Имя пользователя',
         max_length=150,
         unique=True,
     )
     email = models.EmailField(
-        ("Электронная почта"),
+        ('Электронная почта'),
         unique=True,
     )
     first_name = models.CharField(
-        verbose_name="Имя",
+        verbose_name='Имя',
         max_length=150,
         blank=True,
     )
     last_name = models.CharField(
-        verbose_name="Фамилия",
+        verbose_name='Фамилия',
         max_length=150,
         blank=True,
     )
     bio = models.TextField(
-        verbose_name="Биография",
+        verbose_name='Биография',
         blank=True,
     )
 
     ROLE_CHOICES = [
-        ("user", "user"),
-        ("moderator", "moderator"),
-        ("admin", "admin"),
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
     ]
 
     role = models.CharField(
-        verbose_name="Пользовательская роль",
+        verbose_name='Пользовательская роль',
         max_length=9,
         choices=ROLE_CHOICES,
-        default="user",
+        default='user',
     )
 
     class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self) -> str:
         return self.username
+    
+
 class Category(models.Model):
     name = models.CharField(
         'имя категории',
@@ -89,84 +87,47 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(
-        'название',
-        max_length=200,
-        db_index=True
-    )
-    year = models.IntegerField(
-        'год',
-        validators=(validate_year, )
-    )
-    category = models.ForeignKey(
-        Category,
-        on_delete=models.SET_NULL,
-        related_name='titles',
-        verbose_name='категория',
-        null=True,
-        blank=True
-    )
-    description = models.TextField(
-        'описание',
-        max_length=255,
-        null=True,
-        blank=True
-    )
+    name = models.CharField(max_length=100)
+    year = models.SmallIntegerField(null=True)
+    description = models.TextField(blank=True)
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
-        verbose_name='жанр'
+        related_query_name='query_titles',
+        verbose_name='Жанр',
+        blank=True,
     )
-
-    class Meta:
-        verbose_name = 'Произведение'
-        verbose_name_plural = 'Произведения'
-
-    def __str__(self):
-        return self.name
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True,
+                                 null=True, related_name='categories')
 
 
 class Review(models.Model):
-    title = models.ForeignKey(
-        'Title',
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Название произведение'
-    )
-    text = models.TextField('Текст отзыва', max_length=2000)
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name="Автор отзыва",
-    )
+    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    score = models.IntegerField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    grade = models.DecimalField('Рейтинг', max_digits=2, decimal_places=0)
-
-
+    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews', null=True)
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-
-    def clean(self):
-        if self.grade not in range(1,11):
-            raise ValidationError({'grade': 'Оценка может быть целым числом от 1 до 10'})
-
-    def __str__(self):
-        return self.text
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'], name='unique_review'
+            )
+        ]
 
 class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name="comments",
-        verbose_name="Комментарий к отзыву"
+        related_name='comments',
+        verbose_name='Комментарий к отзыву'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="comments",
-        verbose_name="Автор"
+        related_name='comments',
+        verbose_name='Автор'
     )
     text = models.TextField('Текст отзыва', max_length=1000)
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
