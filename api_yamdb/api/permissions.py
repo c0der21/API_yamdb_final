@@ -18,6 +18,7 @@ class IsAdminUserOrReadOnly(BasePermission):
             return request.user.role == 'admin'
         return False
 
+
 class AdminModeratorAuthorPermission(BasePermission):
     def has_permission(self, request, view):
         return (

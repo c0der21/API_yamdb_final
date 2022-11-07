@@ -46,7 +46,7 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
-    
+
 
 class Category(models.Model):
     name = models.CharField(
@@ -97,16 +97,28 @@ class Title(models.Model):
         verbose_name='Жанр',
         blank=True,
     )
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True,
-                                 null=True, related_name='categories')
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='categories'
+        )
 
 
 class Review(models.Model):
     text = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='reviews'
+        )
     score = models.IntegerField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='reviews', null=True)
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE,
+        related_name='reviews',
+        null=True
+        )
+
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
@@ -115,6 +127,7 @@ class Review(models.Model):
                 fields=['author', 'title'], name='unique_review'
             )
         ]
+
 
 class Comment(models.Model):
     review = models.ForeignKey(

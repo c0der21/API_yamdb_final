@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
@@ -22,7 +21,7 @@ from api.permissions import (AdminModeratorAuthorPermission, AdminPermission,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, RegistrationSerializer,
                           ReviewSerializer, TitleSerializer,
-                         UserSerializer,
+                          UserSerializer,
                           VerificationSerializer)
 
 
@@ -107,6 +106,7 @@ def verification_view(request):
     token = AccessToken.for_user(user)
     return Response(data={'token': str(token)}, status=status.HTTP_200_OK)
 
+
 class CategoryViewSet(ModelMixinSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -117,7 +117,8 @@ class CategoryViewSet(ModelMixinSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(rating=Avg('reviews__score')).order_by('id')
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score')).order_by('id')
     http_method_names = ['get', 'post', 'delete', 'patch']
     permission_classes = [IsAdminUserOrReadOnly]
     pagination_class = PageNumberPagination
@@ -137,6 +138,7 @@ class GenreViewSet(ModelMixinSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AdminModeratorAuthorPermission,)
+
     def get_queryset(self):
         review = get_object_or_404(
             Review,
@@ -153,6 +155,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (AdminModeratorAuthorPermission,)
+
     def get_queryset(self):
         title = get_object_or_404(
             Title,

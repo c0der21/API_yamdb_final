@@ -34,7 +34,7 @@ class VerificationSerializer(serializers.Serializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         exclude = ('id', )
         model = Category
@@ -47,6 +47,7 @@ class GenreSerializer(serializers.ModelSerializer):
         exclude = ('id', )
         model = Genre
         lookup_field = 'slug'
+
 
 class CategoryField(serializers.SlugRelatedField):
     def to_representation(self, value):
@@ -61,14 +62,21 @@ class GenreField(serializers.SlugRelatedField):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategoryField(slug_field='slug', queryset=Category.objects.all(), required=False)
-    genre = GenreField(slug_field='slug', queryset=Genre.objects.all(), many=True)
+    category = CategoryField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False
+        )
+    genre = GenreField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+        )
     rating = serializers.IntegerField(required=False)
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
         model = Title
-    
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -91,10 +99,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'text', 'author', 'score', 'pub_date']
-
-    class Meta:
-        fields = '__all__'
-        model = Review
 
 
 class CommentSerializer(serializers.ModelSerializer):
