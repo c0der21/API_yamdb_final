@@ -102,7 +102,7 @@ class Title(models.Model):
         blank=True,
         null=True,
         related_name='categories'
-        )
+    )
 
 
 class Review(models.Model):
@@ -110,14 +110,14 @@ class Review(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='reviews'
-        )
+    )
     score = models.IntegerField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
         null=True
-        )
+    )
 
     class Meta:
         verbose_name = 'Отзыв'
