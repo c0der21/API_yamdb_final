@@ -34,19 +34,17 @@ class VerificationSerializer(serializers.Serializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
-        exclude = ('id', )
         model = Category
-        lookup_field = 'slug'
+        fields = ("name", "slug")
+        lookup_field = "slug"
 
 
 class GenreSerializer(serializers.ModelSerializer):
-
     class Meta:
-        exclude = ('id', )
         model = Genre
-        lookup_field = 'slug'
+        fields = ("name", "slug")
+        lookup_field = "slug"
 
 
 class CategoryField(serializers.SlugRelatedField):
@@ -62,16 +60,10 @@ class GenreField(serializers.SlugRelatedField):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategoryField(
-        slug_field='slug',
-        queryset=Category.objects.all(),
-        required=False
-    )
-    genre = GenreField(
-        slug_field='slug',
-        queryset=Genre.objects.all(),
-        many=True
-    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(), slug_field="slug")
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(), slug_field="slug", many=True)
     rating = serializers.IntegerField(required=False)
 
     class Meta:
@@ -85,6 +77,12 @@ class TitleSerializer(serializers.ModelSerializer):
             'category'
         )
         model = Title
+        
+    def to_representation(self, instance):
+        representation  = super().to_representation(instance)
+        representation ["category"] = CategorySerializer(instance.category).data
+        representation ["genre"] = GenreSerializer(instance.genre, many=True).data
+        return representation
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -109,16 +107,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'author', 'score', 'pub_date']
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    review = serializers.SlugRelatedField(
-        slug_field='text',
-        read_only=True
-    )
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
-    )
-
-    class Meta:
-        fields = '__all__'
-        model = Comment
+class TokenSerializer(serializers.Serializer):
+    """Класс для преобразования данных при получении токена."""
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
