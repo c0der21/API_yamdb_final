@@ -47,11 +47,17 @@ class TitleSerializer(serializers.ModelSerializer):
             'category'
         )
         model = Title
-        
+
     def to_representation(self, instance):
-        representation  = super().to_representation(instance)
-        representation ["category"] = CategorySerializer(instance.category).data
-        representation ["genre"] = GenreSerializer(instance.genre, many=True).data
+        representation = super().to_representation(instance)
+        representation["category"] = CategorySerializer
+        (instance.category).data
+
+        representation["genre"] = GenreSerializer(
+            instance.genre,
+            many=True
+            ).data
+
         return representation
 
 
@@ -75,6 +81,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'text', 'author', 'score', 'pub_date']
+
 
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(
