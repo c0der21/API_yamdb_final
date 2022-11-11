@@ -56,7 +56,7 @@ class TitleSerializer(serializers.ModelSerializer):
         representation["genre"] = GenreSerializer(
             instance.genre,
             many=True
-            ).data
+        ).data
 
         return representation
 
