@@ -50,13 +50,11 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["category"] = CategorySerializer
-        (instance.category).data
+        representation["category"] = CategorySerializer(
+            instance.category).data
 
         representation["genre"] = GenreSerializer(
-            instance.genre,
-            many=True
-        ).data
+            instance.genre, many=True).data
 
         return representation
 
