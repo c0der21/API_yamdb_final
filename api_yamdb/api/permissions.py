@@ -9,8 +9,6 @@ class AdminPermission(BasePermission):
             or request.user.role == 'admin'
         )
 
-class ModeratorPermission(BasePermission):
-    """Класс для разрешения доступа только модератору."""
 
 class IsAdminUserOrReadOnly(BasePermission):
     def has_permission(self, request, view):

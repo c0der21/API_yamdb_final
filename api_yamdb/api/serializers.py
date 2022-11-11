@@ -105,9 +105,3 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'text', 'author', 'score', 'pub_date']
-
-
-class TokenSerializer(serializers.Serializer):
-    """Класс для преобразования данных при получении токена."""
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
