@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-### Мы его во users/views.py используем)
+
 class AdminPermission(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (

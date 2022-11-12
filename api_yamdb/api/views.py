@@ -39,14 +39,14 @@ class CategoryViewSet(ModelMixinSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = (Title
-               .objects
-               .select_related('category')
-               .prefetch_related('genre')
-               .annotate(rating=Avg('reviews__score'))
-               .order_by('id')
-            )
-### И вправду такой метод выглядит значительно чище и опрятнее
+    queryset = (
+        Title
+        .objects
+        .select_related('category')
+        .prefetch_related('genre')
+        .annotate(rating=Avg('reviews__score'))
+        .order_by('id')
+    )
     permission_classes = (IsAdminUserOrReadOnly,)
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
