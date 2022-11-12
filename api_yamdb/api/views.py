@@ -17,7 +17,7 @@ from api.permissions import (IsAdminUserOrReadOnly,
 from .filters import TitleFilter
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
-                             TitleSerializer)
+                             TitleWriteSerializer, TitleReadSerializer)
 
 
 class CreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -39,14 +39,22 @@ class CategoryViewSet(ModelMixinSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.select_related(
-        'category').prefetch_related('genre').annotate(
-        rating=Avg('reviews__score')).order_by('id')
-    http_method_names = ['get', 'post', 'delete', 'patch']
-    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = (Title
+               .objects
+               .select_related('category')
+               .prefetch_related('genre')
+               .annotate(rating=Avg('reviews__score'))
+               .order_by('id')
+            )
+### И вправду такой метод выглядит значительно чище и опрятнее
+    permission_classes = (IsAdminUserOrReadOnly,)
     pagination_class = PageNumberPagination
-    serializer_class = TitleSerializer
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PATCH']:
+            return TitleWriteSerializer
+        return TitleReadSerializer
 
 
 class GenreViewSet(ModelMixinSet):
