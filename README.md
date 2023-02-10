@@ -80,5 +80,5 @@ POST /api/v1/titles/{title_id}/reviews/{review_id}/comments/
 Полный список запросов API находятся в документации.
 ## Авторы:
 Воронович Кирилл - https://github.com/c0der21
-Лифанов Дмитрий- https://github.com/Dimalright
-Чугин Владислав
+Лифанов Дмитрий - https://github.com/Dimalright
+Чугин Владислав - https://github.com/Medbrat4669
